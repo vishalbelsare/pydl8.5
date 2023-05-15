@@ -5,14 +5,15 @@ DL8.5 classifier : python side iterative search
 Iterative search is the idea that the algorithm starts with finding an optimal 
 shallow tree, and then uses the quality of this tree to bound the quality of 
 deeper trees. This class shows how to perform this type of search by repeatedly 
-calling the DL8.5 algorithm.
+calling the DL8.5 algorithm. A second implementation is illustrated in 
+plot_classifier_iterative_c_plus.py, and uses C++.
 """
 import numpy as np
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import time
-from dl85 import DL85Classifier
+from pydl85 import DL85Classifier
 
 dataset = np.genfromtxt("../datasets/anneal.txt", delimiter=' ')
 X, y = dataset[:, 1:], dataset[:, 0]

@@ -3,7 +3,7 @@ build: false
 environment:
   matrix:
     - PYTHON: "C:\\Python37-x64"
-      # PYTHON_VERSION: "3.9.x"
+      # PYTHON_VERSION: "3.5.x"
       # PYTHON_ARCH: "64"
       # NUMPY_VERSION: "1.13.1"
       # SCIPY_VERSION: "0.19.1"
@@ -27,7 +27,6 @@ install:
   - IF DEFINED USE_CLANG clang-cl -v
   - IF DEFINED USE_CLANG set CMAKE_EXTRA_OPTIONS=-DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe
   - cd C:\projects\dl8-5
-  - cd python_library
 #  # install the dependencies
 #  - "conda install --yes pip numpy==%NUMPY_VERSION% scipy==%SCIPY_VERSION% setuptools cython nose pytest pytest-cov"
 #  - pip install --pre -f https://sklearn-nightly.scdn8.secure.raxcdn.com scikit-learn

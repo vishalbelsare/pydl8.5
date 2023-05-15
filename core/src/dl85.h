@@ -2,26 +2,24 @@
 // Created by Gael Aglin on 2019-10-06.
 //
 
-#ifndef DL85_DL85_H
-#define DL85_DL85_H
+#ifndef DL85_H
+#define DL85_H
 
-#include <iostream>
-#include <cstdlib>
-#include <cmath>
-#include <string>
-#include <sstream>
-#include <map>
-#include <vector>
-#include <utility>
-#include <functional>
-#include <chrono>
 #include "globals.h"
+#include <iostream>
 #include "dataManager.h"
-#include "rCoverTotalFreq.h"
-#include "rCoverWeighted.h"
-#include "lcm_pruned.h"
-#include "query_totalfreq.h"
-//#include "query_weighted.h"
+#include "rCoverFreq.h"
+#include "rCoverWeight.h"
+#include "search_nocache.h"
+#include "search_trie_cache.h"
+#include "search_cover_cache.h"
+#include "nodeDataManager_Cover.h"
+#include "nodeDataManager_Trie.h"
+#include "solution_Trie.h"
+#include "solution_Cover.h"
+#include "cache_hash_cover.h"
+#include "cache_hash_itemset.h"
+#include "cache_trie.h"
 
 using namespace std;
 
@@ -53,34 +51,45 @@ using namespace std;
  * @param verbose_param - a boolean value to set whether the search must be verbose or not. Default value is false
  * @return a string representing a serialized form of the found tree is returned
  */
-string search(Supports supports,
-              int ntransactions,
-              int nattributes,
-              int nclasses,
-              Bool *data,
-              Class *target,
-              int maxdepth = 1,
-              int minsup = 1,
-              float maxError = 0,
-              bool stopAfterError = false,
-//              bool iterative = false,
-              //get a pointer on cover as param and return a vector of float. Due to iterator behaviour of RCover
-              // object and the wrapping done in cython, this pointer in python is seen as a list of tids in the cover
-              function<vector<float>(RCover *)> tids_error_class_callback = nullptr,
-              //get a pointer on cover as param and return a vector of float. Due to iterator behaviour of RCover object
-              // and the wrapping done in cython, this pointer in python is seen as a list of support per class of the cover
-              function<vector<float>(RCover *)> supports_error_class_callback = nullptr,
-              //get a pointer on cover as param and return a float. Due to iterator behaviour of RCover object and the
-              // wrapping done in cython, this pointer in python is seen as a list of tids in the cover
-              function<float(RCover *)> tids_error_callback = nullptr,
-              float *in_weights = nullptr,
-              bool tids_error_class_is_null = true,
-              bool supports_error_class_is_null = true,
-              bool tids_error_is_null = true,
-              bool infoGain = false,
-              bool infoAsc = true,
-              bool repeatSort = false,
-              int timeLimit = 0,
-              bool verbose_param = false);
+string launch(
+        ErrorVals supports,
+        Transaction ntransactions,
+        Attribute nattributes,
+        Class nclasses,
+        Bool *data,
+        Class *target,
+        Depth maxdepth = 1,
+        Support minsup = 1,
+        Error maxError = 0,
+        bool stopAfterError = false,
+        //get a pointer on cover as param and return a vector of float. Due to iterator behaviour of RCover
+        // object and the wrapping done in cython, this pointer in python is seen as a list of tids in the cover
+        function<vector<float>(RCover *)> tids_error_class_callback = nullptr,
+        //get a pointer on cover as param and return a vector of float. Due to iterator behaviour of RCover object
+        // and the wrapping done in cython, this pointer in python is seen as a list of support per class of the cover
+        function<vector<float>(RCover *)> supports_error_class_callback = nullptr,
+        //get a pointer on cover as param and return a float. Due to iterator behaviour of RCover object and the
+        // wrapping done in cython, this pointer in python is seen as a list of tids in the cover
+        function<float(RCover *)> tids_error_callback = nullptr,
+        float *in_weights = nullptr,
+        bool tids_error_class_is_null = true,
+        bool supports_error_class_is_null = true,
+        bool tids_error_is_null = true,
+        bool infoGain = false,
+        bool infoAsc = true,
+        bool repeatSort = false,
+        int timeLimit = 0,
+        bool verbose_param = false,
+        CacheType cache_type = CacheTrieItemset,
+        int cache_size = 1000,
+        WipeType wipe_type = All,
+        float wipe_factor = .5f,
+        bool with_cache = true,
+        bool useSpecial = true,
+        bool use_ub = true,
+        bool similarlb = false,
+        bool dynamic_branching = false,
+        bool similar_for_branching = true,
+        bool from_cpp = true);
 
-#endif //DL85_DL85_H
+#endif //DL85_H

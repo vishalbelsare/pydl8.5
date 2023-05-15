@@ -1,22 +1,22 @@
-from libc.stdlib cimport malloc, free
+#from libc.stdlib cimport malloc, free
+#from libcpp.map cimport map
+#from libcpp.utility cimport pair
 from libcpp.string cimport string
-from libcpp.map cimport map
-from libcpp.utility cimport pair
 from libcpp cimport bool, nullptr
 from libcpp.vector cimport vector
 from libcpp.functional cimport function
 import numpy as np
 
-cdef extern from "../core/src/globals.h":
-    cdef cppclass Array[T]:
-        cppclass iterator:
-            T operator*()
-            iterator operator++()
-            bool operator==(iterator)
-            bool operator!=(iterator)
-        iterator begin()
-        iterator end()
-        int getSize()
+cdef extern from "../core/src/cache.h":
+    cpdef enum CacheType:
+        CacheTrieItemset,
+        CacheHashItemset,
+        CacheHashCover
+
+    cpdef enum WipeType:
+        All,
+        Subnodes,
+        Reuses
 
 cdef extern from "py_tid_error_class_function_wrapper.h":
     cdef cppclass PyTidErrorClassWrapper:
@@ -38,7 +38,7 @@ cdef extern from "py_tid_error_function_wrapper.h":
 
 
 cdef extern from "../core/src/dl85.h":
-    string search ( float* supports,
+    string launch ( float* supports,
                     int ntransactions,
                     int nattributes,
                     int nclasses,
@@ -48,7 +48,6 @@ cdef extern from "../core/src/dl85.h":
                     int minsup,
                     float maxError,
                     bool stopAfterError,
-                    # bool iterative,
                     PyTidErrorClassWrapper tids_error_class_callback,
                     PySupportErrorClassWrapper supports_error_class_callback,
                     PyTidErrorWrapper tids_error_callback,
@@ -60,9 +59,18 @@ cdef extern from "../core/src/dl85.h":
                     bool infoAsc,
                     bool repeatSort,
                     int timeLimit,
-                    # map[int, pair[int, int]]* continuousMap,
-                    # bool save,
-                    bool verbose_param) except +
+                    bool verbose_param,
+                    CacheType cache_type,
+                    int cache_size,
+                    WipeType wipe_type,
+                    float wipe_factor,
+                    bool with_cache,
+                    bool useSpecial,
+                    bool use_ub,
+                    bool similarlb,
+                    bool dynamic_branching,
+                    bool similar_for_branching,
+                    bool from_cpp) except +
 
 
 def solve(data,
@@ -75,16 +83,22 @@ def solve(data,
           example_weights=[],
           max_error=0,
           stop_after_better=False,
-          # iterative=False,
           time_limit=0,
           verb=False,
           desc=False,
           asc=False,
           repeat_sort=False,
-          # continuousMap=None,
-          # bin_save=False,
-          # predictor=False
-          ):
+          predictor=False,
+          cachetype=CacheTrieItemset,
+          cachesize=0,
+          wipetype=Reuses,
+          wipefactor=0.5,
+          withcache=True,
+          usespecial=True,
+          useub=True,
+          similar_lb=False,
+          dyn_branch=False,
+          similar_for_branching=True):
 
     cdef PyTidErrorClassWrapper tec_func = PyTidErrorClassWrapper(tec_func_)
     tec_null_flag = True
@@ -150,16 +164,11 @@ def solve(data,
     if max_error < 0:  # raise error when incompatibility between max_error value and stop_after_better value
         stop_after_better = False
 
-    # cont_map = NULL
-    # if continuousMap is not None:
-        # #cont_map must be defined properly
-        # cont_map = NULL
-
     info_gain = not (desc == False and asc == False)
 
     # pred = not predictor
 
-    out = search(supports = &supports_view[0],
+    out = launch(supports = &supports_view[0],
                  ntransactions = ntransactions,
                  nattributes = nattributes,
                  nclasses = nclasses,
@@ -169,7 +178,6 @@ def solve(data,
                  minsup = min_sup,
                  maxError = max_error,
                  stopAfterError = stop_after_better,
-                 # iterative = iterative,
                  tids_error_class_callback = tec_func,
                  supports_error_class_callback = sec_func,
                  tids_error_callback = te_func,
@@ -181,8 +189,17 @@ def solve(data,
                  infoAsc = asc,
                  repeatSort = repeat_sort,
                  timeLimit = time_limit,
-                 # continuousMap = NULL,
-                 # save = bin_save,
-                 verbose_param = verb)
+                 verbose_param = verb,
+                 cache_type = cachetype,
+                 cache_size = cachesize,
+                 wipe_type = wipetype,
+                 wipe_factor = wipefactor,
+                 with_cache = withcache,
+                 useSpecial = usespecial,
+                 use_ub = useub,
+                 similarlb = similar_lb,
+                 dynamic_branching = dyn_branch,
+                 similar_for_branching = similar_for_branching,
+                 from_cpp = False)
 
     return out.decode("utf-8")

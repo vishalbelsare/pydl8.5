@@ -14,16 +14,17 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, "../")
-from dl85 import __version__
+from pydl85 import __version__
 
 import sphinx_gallery
 import sphinx_rtd_theme
+from datetime import date
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyDL8.5'
-copyright = '2021, Gaël Aglin and Siegfried Nijssen and Pierre Schaus'
+copyright = str(date.today().year) + ', Gaël Aglin and Siegfried Nijssen and Pierre Schaus'
 author = 'Gaël Aglin and Siegfried Nijssen and Pierre Schaus'
 
 # The full version, including alpha/beta/rc tags
@@ -316,6 +317,7 @@ intersphinx_mapping = {
 # sphinx-gallery configuration
 sphinx_gallery_conf = {
     'examples_dirs': '../examples',   # path to your example scripts
+    # 'ignore_pattern': '../examples/utils.py',
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
 }
 
